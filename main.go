@@ -60,6 +60,7 @@ func performAll() {
 	for _, modelConfig := range config.Models {
 		m := model.Model{
 			Config: modelConfig,
+			Report: &config.Report{},
 		}
 		m.Perform()
 	}
@@ -70,6 +71,7 @@ func performOne(modelName string) {
 		if modelConfig.Name == modelName {
 			m := model.Model{
 				Config: modelConfig,
+				Report: &config.Report{},
 			}
 			m.Perform()
 			return
