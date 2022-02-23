@@ -45,8 +45,8 @@ func (ctx *MySQL) perform() (err error) {
 	}
 
 	// mysqldump command
-	if len(ctx.database) == 0 {
-		return fmt.Errorf("mysql database config is required")
+	if ctx.database == "" {
+		logger.Warn("mysql database is not specified, passing --all-databases")
 	}
 
 	err = ctx.dump()
@@ -71,8 +71,18 @@ func (ctx *MySQL) dumpArgs() []string {
 		dumpArgs = append(dumpArgs, ctx.additionalOptions...)
 	}
 
-	dumpArgs = append(dumpArgs, ctx.database)
-	dumpFilePath := path.Join(ctx.dumpPath, ctx.database+".sql")
+	if ctx.database == "" {
+		dumpArgs = append(dumpArgs, "--all-databases")
+	} else {
+		dumpArgs = append(dumpArgs, ctx.database)
+	}
+
+	filename := ctx.database + ".sql"
+	if ctx.database == "" {
+		filename = "all-databases.sql"
+	}
+
+	dumpFilePath := path.Join(ctx.dumpPath, filename)
 	dumpArgs = append(dumpArgs, "--result-file="+dumpFilePath)
 	return dumpArgs
 }
