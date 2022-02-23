@@ -2,14 +2,15 @@ package storage
 
 import (
 	"fmt"
+	"os"
+	"path"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/huacnlee/gobackup/logger"
-	"os"
-	"path"
 )
 
 // S3 - Amazon S3 storage
@@ -37,12 +38,13 @@ func (ctx *S3) open() (err error) {
 		cfg.Endpoint = aws.String(endpoint)
 	}
 	cfg.Credentials = credentials.NewStaticCredentials(
-		ctx.viper.GetString("access_key_id"),
-		ctx.viper.GetString("secret_access_key"),
+		ctx.viper.GetString("access_key"),
+		ctx.viper.GetString("secret_key"),
 		ctx.viper.GetString("token"),
 	)
 	cfg.Region = aws.String(ctx.viper.GetString("region"))
 	cfg.MaxRetries = aws.Int(ctx.viper.GetInt("max_retries"))
+	cfg.S3ForcePathStyle = aws.Bool(ctx.viper.GetBool("force_path_style"))
 
 	ctx.bucket = ctx.viper.GetString("bucket")
 	ctx.path = ctx.viper.GetString("path")
