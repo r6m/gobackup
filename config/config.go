@@ -30,6 +30,7 @@ type ModelConfig struct {
 	Archive      *viper.Viper
 	Databases    []SubConfig
 	Storages     []SubConfig
+	NotifyBy     SubConfig
 	Viper        *viper.Viper
 }
 
@@ -93,6 +94,11 @@ func loadModel(key string) (model ModelConfig) {
 	model.StoreWith = SubConfig{
 		Type:  model.Viper.GetString("store_with.type"),
 		Viper: model.Viper.Sub("store_with"),
+	}
+
+	model.NotifyBy = SubConfig{
+		Type:  model.Viper.GetString("notify_by.type"),
+		Viper: model.Viper.Sub("notify_by"),
 	}
 
 	model.Archive = model.Viper.Sub("archive")
