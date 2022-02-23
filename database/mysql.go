@@ -2,10 +2,11 @@ package database
 
 import (
 	"fmt"
-	"github.com/huacnlee/gobackup/helper"
-	"github.com/huacnlee/gobackup/logger"
 	"path"
 	"strings"
+
+	"github.com/huacnlee/gobackup/helper"
+	"github.com/huacnlee/gobackup/logger"
 )
 
 // MySQL database

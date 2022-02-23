@@ -2,10 +2,11 @@ package storage
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/huacnlee/gobackup/config"
 	"github.com/huacnlee/gobackup/logger"
 	"github.com/spf13/viper"
-	"path/filepath"
 )
 
 // Base storage
