@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/huacnlee/gobackup/logger"
+	"github.com/spf13/viper"
 )
 
 // S3 - Amazon S3 storage
@@ -19,8 +20,11 @@ import (
 // bucket: gobackup-test
 // region: us-east-1
 // path: backups
-// access_key_id: your-access-key-id
-// secret_access_key: your-secret-access-key
+// access_key: your-access-key
+// secret_key: your-secret-key
+// metadata:
+//   User-ID: 123
+//   App-ID: app-name
 // max_retries: 5
 // timeout: 300
 type S3 struct {
@@ -69,6 +73,15 @@ func (ctx *S3) upload(fileKey string) (err error) {
 		Bucket: aws.String(ctx.bucket),
 		Key:    aws.String(remotePath),
 		Body:   f,
+	}
+
+	metadata := viper.GetStringMapString("metadata")
+	if metadata != nil {
+		md := make(map[string]*string, 0)
+		for k, v := range viper.GetStringMapString("metadata") {
+			md[k] = aws.String(v)
+		}
+		input.Metadata = md
 	}
 
 	logger.Info("-> S3 Uploading...")
