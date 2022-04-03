@@ -1,12 +1,11 @@
 package database
 
 import (
-	"fmt"
-	"github.com/huacnlee/gobackup/helper"
-	"github.com/huacnlee/gobackup/logger"
 	"os"
 	"path"
-	"strings"
+
+	"github.com/huacnlee/gobackup/helper"
+	"github.com/huacnlee/gobackup/logger"
 )
 
 // PostgreSQL database
@@ -37,21 +36,21 @@ func (ctx PostgreSQL) perform() (err error) {
 	ctx.database = viper.GetString("database")
 	ctx.username = viper.GetString("username")
 	ctx.password = viper.GetString("password")
+	ctx.dumpCommand = "pg_dump"
 
-	if err = ctx.prepare(); err != nil {
-		return
+	if ctx.database == "" {
+		ctx.dumpCommand = "pg_dumpall"
+		logger.Warn("postgres database is not specified, using 'pg_dumpall' to backup all databases")
 	}
 
 	err = ctx.dump()
 	return
 }
 
-func (ctx *PostgreSQL) prepare() (err error) {
+func (ctx *PostgreSQL) args() []string {
 	// mysqldump command
 	dumpArgs := []string{}
-	if len(ctx.database) == 0 {
-		return fmt.Errorf("PostgreSQL database config is required")
-	}
+
 	if len(ctx.host) > 0 {
 		dumpArgs = append(dumpArgs, "--host="+ctx.host)
 	}
@@ -62,21 +61,25 @@ func (ctx *PostgreSQL) prepare() (err error) {
 		dumpArgs = append(dumpArgs, "--username="+ctx.username)
 	}
 
-	ctx.dumpCommand = "pg_dump " + strings.Join(dumpArgs, " ") + " " + ctx.database
+	if ctx.database != "" {
+		dumpArgs = append(dumpArgs, ctx.database)
+	}
 
-	return nil
+	dumpFilePath := path.Join(ctx.dumpPath, ctx.database+".sql")
+	dumpArgs = append(dumpArgs, "-f", dumpFilePath)
+
+	return dumpArgs
 }
 
 func (ctx *PostgreSQL) dump() error {
-	dumpFilePath := path.Join(ctx.dumpPath, ctx.database+".sql")
 	logger.Info("-> Dumping PostgreSQL...")
 	if len(ctx.password) > 0 {
 		os.Setenv("PGPASSWORD", ctx.password)
 	}
-	_, err := helper.Exec(ctx.dumpCommand, "-f", dumpFilePath)
+	_, err := helper.Exec(ctx.dumpCommand, ctx.args()...)
 	if err != nil {
 		return err
 	}
-	logger.Info("dump path:", dumpFilePath)
+	logger.Info("dump path:", ctx.dumpPath)
 	return nil
 }
