@@ -2,6 +2,7 @@ package model
 
 import (
 	"os"
+	"path"
 	"time"
 
 	"github.com/huacnlee/gobackup/archive"
@@ -68,6 +69,7 @@ func (ctx Model) Perform() {
 		ctx.Report.Message = "Compressing Error\n" + ctx.Report.Message + err.Error()
 		return
 	}
+	ctx.Report.Filename = path.Base(archivePath)
 	ctx.Report.Status = "success"
 
 	archivePath, err = encryptor.Run(archivePath, ctx.Config)
@@ -77,6 +79,7 @@ func (ctx Model) Perform() {
 		ctx.Report.Message = "Encrypting Error\n" + ctx.Report.Message + err.Error()
 		return
 	}
+	ctx.Report.Filename = path.Base(archivePath)
 	ctx.Report.Status = "success"
 
 	err = storage.Run(ctx.Config, archivePath)

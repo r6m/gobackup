@@ -8,4 +8,5 @@ type Report struct {
 	Duration  time.Duration
 	Message   string
 	Status    string
+	Filename  string
 }

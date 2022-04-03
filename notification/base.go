@@ -31,17 +31,20 @@ func Run(model config.ModelConfig, report *config.Report) error {
 	base := newBase(model, report)
 
 	logger.Info("------------ Notification -------------")
+	defer logger.Info("------------ -------------\n")
+
 	var ctx Context
 	switch model.NotifyBy.Type {
 	case "http":
 		ctx = &HTTP{Base: base}
-		if err := ctx.perform(); err != nil {
-			logger.Error(err)
-		}
 	default:
 		logger.Info("No Notification Set")
+		return nil
 	}
-	logger.Info("------------ -------------\n")
+
+	if err := ctx.perform(); err != nil {
+		return err
+	}
 
 	return nil
 }
