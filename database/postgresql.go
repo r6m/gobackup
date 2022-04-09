@@ -48,7 +48,7 @@ func (ctx PostgreSQL) perform() (err error) {
 }
 
 func (ctx *PostgreSQL) args() []string {
-	// mysqldump command
+	// pg_dump/all command
 	dumpArgs := []string{}
 
 	if len(ctx.host) > 0 {
@@ -61,11 +61,12 @@ func (ctx *PostgreSQL) args() []string {
 		dumpArgs = append(dumpArgs, "--username="+ctx.username)
 	}
 
-	if ctx.database != "" {
-		dumpArgs = append(dumpArgs, ctx.database)
+	filename := ctx.database + ".sql"
+	if ctx.database == "" {
+		filename = "all-databases.sql"
 	}
 
-	dumpFilePath := path.Join(ctx.dumpPath, ctx.database+".sql")
+	dumpFilePath := path.Join(ctx.dumpPath, filename)
 	dumpArgs = append(dumpArgs, "-f", dumpFilePath)
 
 	return dumpArgs

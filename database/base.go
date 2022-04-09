@@ -49,8 +49,7 @@ func runModel(model config.ModelConfig, dbConfig config.SubConfig) (err error) {
 	case "mongodb":
 		ctx = &MongoDB{Base: base}
 	default:
-		logger.Warn(fmt.Errorf("model: %s databases.%s config `type: %s`, but is not implement", model.Name, dbConfig.Name, dbConfig.Type))
-		return
+		return fmt.Errorf("model: %s databases.%s config `type: %s`, but is not implement", model.Name, dbConfig.Name, dbConfig.Type)
 	}
 
 	logger.Info("=> database |", dbConfig.Type, ":", base.name)
