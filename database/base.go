@@ -2,8 +2,10 @@ package database
 
 import (
 	"fmt"
+	"path"
 
 	"github.com/huacnlee/gobackup/config"
+	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
 	"github.com/spf13/viper"
 )
@@ -29,8 +31,8 @@ func newBase(model config.ModelConfig, dbConfig config.SubConfig) (base Base) {
 		viper:    dbConfig.Viper,
 		name:     dbConfig.Name,
 	}
-	// base.dumpPath = path.Join(model.DumpPath)
-	// helper.MkdirP(base.dumpPath)
+	base.dumpPath = path.Join(model.DumpPath)
+	helper.MkdirP(base.dumpPath)
 	return
 }
 
