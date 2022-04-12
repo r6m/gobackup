@@ -2,9 +2,9 @@ package database
 
 import (
 	"fmt"
+
 	"github.com/huacnlee/gobackup/helper"
 	"github.com/huacnlee/gobackup/logger"
-	"strings"
 )
 
 // MongoDB database
@@ -54,55 +54,44 @@ func (ctx *MongoDB) perform() (err error) {
 	return nil
 }
 
-func (ctx *MongoDB) mongodump() string {
-	return mongodumpCli + " " +
-		ctx.nameOption() + " " +
-		ctx.credentialOptions() + " " +
-		ctx.connectivityOptions() + " " +
-		ctx.oplogOption() + " " +
-		"--out=" + ctx.dumpPath
-}
+func (ctx *MongoDB) args() []string {
+	args := []string{}
 
-func (ctx *MongoDB) nameOption() string {
-	return "--db=" + ctx.database
-}
-
-func (ctx *MongoDB) credentialOptions() string {
-	opts := []string{}
-	if len(ctx.username) > 0 {
-		opts = append(opts, "--username="+ctx.username)
+	// connection args
+	if ctx.host != "" {
+		args = append(args, "--host="+ctx.host)
 	}
-	if len(ctx.password) > 0 {
-		opts = append(opts, `--password=`+ctx.password)
-	}
-	if len(ctx.authdb) > 0 {
-		opts = append(opts, "--authenticationDatabase="+ctx.authdb)
-	}
-	return strings.Join(opts, " ")
-}
-
-func (ctx *MongoDB) connectivityOptions() string {
-	opts := []string{}
-	if len(ctx.host) > 0 {
-		opts = append(opts, "--host="+ctx.host+"")
-	}
-	if len(ctx.port) > 0 {
-		opts = append(opts, "--port="+ctx.port+"")
+	if ctx.port != "" {
+		args = append(args, "--port="+ctx.port)
 	}
 
-	return strings.Join(opts, " ")
-}
+	// credential args
+	if ctx.username != "" {
+		args = append(args, "--username="+ctx.username)
+	}
+	if ctx.password != "" {
+		args = append(args, "--password="+ctx.password)
+	}
+	if ctx.authdb != "" {
+		args = append(args, "--authenticationDatabase="+ctx.authdb)
+	}
 
-func (ctx *MongoDB) oplogOption() string {
+	// will dump all databases if not specified
+	if ctx.database != "" {
+		args = append(args, "--db="+ctx.database)
+	}
+
 	if ctx.oplog {
-		return "--oplog"
+		args = append(args, "--oplog")
 	}
 
-	return ""
+	args = append(args, "--out="+ctx.dumpPath)
+
+	return args
 }
 
 func (ctx *MongoDB) dump() error {
-	out, err := helper.Exec(ctx.mongodump())
+	out, err := helper.Exec(mongodumpCli, ctx.args()...)
 	if err != nil {
 		return fmt.Errorf("-> Dump error: %s", err)
 	}
